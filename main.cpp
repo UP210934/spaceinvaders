@@ -6,13 +6,13 @@
 using namespace std;
 class EntityMobile{
     protected:
-    bool right;
-    bool abajo;
+    bool right_;
+    bool down_;
     sf::Texture texture_;
     sf::Sprite sprite_;
-    sf::Sprite sprite_bala;
+    sf::Sprite sprite_projectile_;
     float posX_, posY_;
-    float ancho, alto;
+    float width_, height_;
     int velocityx_;
     int velocityy_;
     int velocity_alien_x_;
@@ -34,7 +34,7 @@ class EntityMobile{
         this-> posX_=x;
         this-> posY_=y;
         this->sprite_.setPosition(x,y);
-        this->right=true;
+        this->right_=true;
 
         /*
         Variable calculo de Velocidad
@@ -49,15 +49,15 @@ class EntityMobile{
 
         sf::Texture tex;
         tex.loadFromFile("media/laser.png");
-        this->sprite_bala.setTexture(tex);
+        this->sprite_projectile_.setTexture(tex);
         indice_escala=10*100.0/this->sprite_.getGlobalBounds().width;
-        this->sprite_bala.setScale(indice_escala*0.01, indice_escala*0.01);
+        this->sprite_projectile_.setScale(indice_escala*0.01, indice_escala*0.01);
 
 
 
 
-        this->ancho= this->sprite_.getGlobalBounds().width;
-        this->alto= this->sprite_.getGlobalBounds().height;
+        this->width_= this->sprite_.getGlobalBounds().width;
+        this->height_= this->sprite_.getGlobalBounds().height;
 
 
     }
@@ -98,11 +98,11 @@ class EntityMobile{
             }
         }
         void MoveAutomaticX(sf::RenderWindow &window){
-            if(this->right==true){
+            if(this->right_==true){
                 if(this->posX_<1280.0 - 100){
                     this->posX_=this->posX_+this->velocity_alien_x_;
                 }else{
-                    this->right=false;
+                    this->right_=false;
 
                 }
 
@@ -110,7 +110,7 @@ class EntityMobile{
                 if(this->posX_>1.0){
                     this->posX_=this->posX_-this->velocity_alien_x_;
                 }else{
-                    this->right=true;
+                    this->right_=true;
 
                 }
             }
@@ -125,7 +125,7 @@ class EntityMobile{
                     this->posY_=this->posY_+this->velocity_alien_y_;
                     window.draw(this->sprite_);
                 }else{
-                    this->abajo=false;
+                    this->down_=false;
 
                 }
 
@@ -133,22 +133,23 @@ class EntityMobile{
             this->sprite_.setPosition(this->posX_, this->posY_);
         }
 
-        float GetAlto(){
-            return this->alto;
-        }
-        float GetAncho(){
-            return this-> ancho;
-        }
-        float GetPosX(){
-            return this->posX_;
-        }
-        float GetposY(){
-            return this->posY_;
-        }
 
-        bool VaDerecho(){
-            return this->right;
-        }
+    float GetHeight() {
+        return this->height_;
+    }
+    float GetWidth() {
+        return this->width_;
+    }
+    float GetPosX() {
+        return this->posX_;
+    }
+    float GetPosY() {
+        return this->posY_;
+    }
+
+    bool MovesRight() {
+        return this->right_;
+    }
 
 
 
@@ -181,13 +182,13 @@ class Alien:public EntityMobile{
 
 
 
-class Nave:public EntityMobile{
+class SpaceShip:public EntityMobile{
 private:
     int hp;
     int presed;
-    std::vector<sf::Sprite> balas;
+    std::vector<sf::Sprite> projectile_;
 public:
-    Nave(float x, float y, std::string image, float dim):EntityMobile(x, y, image, dim){
+    SpaceShip(float x, float y, std::string image, float dim):EntityMobile(x, y, image, dim){
 
         this->hp=2;
 
@@ -220,27 +221,28 @@ public:
         this->sprite_.setPosition(this->posX_, this->posY_);
         //std::cout<< "mover\n";
     }
-    void CatchIntersections(Alien &cupa){
+    void CatchIntersections(Alien &alien){
 
 
-         sf::FloatRect imagen(cupa.GetPosX(),cupa.GetposY(), cupa.GetAncho(), cupa.GetAlto());
-                    if(this->sprite_.getGlobalBounds().intersects(imagen)){
-                       // std::cout<< "yes\n";
+       sf::FloatRect imagen(alien.GetPosX(), alien.GetPosY(), alien.GetWidth(), alien.GetHeight());
+        if (this->sprite_.getGlobalBounds().intersects(imagen)) {
+            // std::cout<< "yes\n";
 
-                        }else{
-                      // std::cout<< "no\n";
-                        }
-
+        }
+        else {
+            // std::cout<< "no\n";
+        }
 
     }
 
-     void shootUP(sf::RenderWindow &window){
-            //window.draw(this->sprite_bala);
-            this->sprite_bala.setPosition(this->posX_+0.5*this->ancho, this->posY_-this->sprite_bala.getGlobalBounds().height);
-            this->balas.push_back(this->sprite_bala);
-            //window.draw(ojo);
-            //this->balas[this->balas.size()-1].setPosition(this->sprite_bala.getGlobalBounds().height);
-            window.draw(this->balas[this->balas.size()-1]);
+      void ShootUp(sf::RenderWindow& window) {
+        //window.draw(this->sprite_projectile_);
+        this->sprite_projectile_.setPosition(this->posX_ + 0.5 * this->width_, this->posY_ - this->sprite_projectile_.getGlobalBounds().height);
+        this->projectile_.push_back(this->sprite_projectile_);
+        //window.draw(ojo);
+        //this->projectile_[this->projectile_.size()-1].setPosition(this->sprite_projectile_.getGlobalBounds().height);
+        window.draw(this->projectile_[this->projectile_.size() - 1]);
+
 
 
 
@@ -275,8 +277,8 @@ int main(){
     window.setFramerateLimit(40);
 
     //Instancias
-    Nave monguse(590,600,"media/plane.png",100);
-    Alien coopa(1,1,"media/white-alien.png",110);
+    SpaceShip ship1(590,600,"media/plane.png",100);
+    Alien al1(1,1,"media/white-alien.png",110);
     //Renderizado
     while (window.isOpen()){
         // Process events
@@ -288,12 +290,12 @@ int main(){
         }
     // Clear screen
         window.clear();
-        monguse.Move();
-        coopa.MoveAutomaticX(window);
-        monguse.CatchIntersections(coopa);
-        monguse.Show(window);
+        ship1.Move();
+        al1.MoveAutomaticX(window);
+        ship1.CatchIntersections(al1);
+        ship1.Show(window);
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space)){
-         monguse.shootUP(window);
+         ship1.ShootUp(window);
         }
         window.display();
     }
