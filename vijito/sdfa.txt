@@ -1,0 +1,183 @@
+#include <iostream>
+#include <SFML/Graphics.hpp>
+
+class Movement{
+private:
+    sf::Vector2f currentposition_;
+    int velocidad_movimiento_ = 4;
+    protected:
+sf::Vector2f validar_posicion( sf::Vector2f current_position_raw){
+//X
+    if(current_position_raw.x < 0 )
+    current_position_raw.x = 1280 + 216;
+    else if (current_position_raw.x > 1280 - 216)
+    current_position_raw.x=0;
+    //Y
+    if(current_position_raw.y < 0)
+     current_position_raw.y = 720;//+94;
+    else if (current_position_raw.y > 720 - 94)
+     current_position_raw.y = 0;// -94;
+
+    return current_position_raw;
+}
+public:
+
+float MoverDerecha(float pos){
+    pos+=this->velocidad_movimiento_;
+    return pos;
+}
+float MoverIzquierda(float pos){
+    pos-=this->velocidad_movimiento_;
+    return pos;
+}
+float MoverArriba(float pos){
+    pos-=this->velocidad_movimiento_;
+    return pos;
+}
+float MoverAbajo(float pos){
+    pos+=this->velocidad_movimiento_;
+    return pos;
+}
+
+};
+
+class Koopa:public Movement{
+
+	private:
+		sf:: Texture textura_;
+		sf:: Sprite sprite_;
+    void Tex(){
+        if(!this->textura_.loadFromFile("media/koopa2.png")){
+            true;
+        }
+    }
+	public:
+		Koopa (float pos_x, float pos_y) {
+		    this->Tex();
+		    this -> sprite_.setTexture(this->textura_);
+            this -> sprite_.setPosition(pos_x, pos_y);
+		}
+void Draw(sf::RenderWindow &win){
+    win.draw(this->sprite_);
+}
+
+
+
+
+//sf::Event key_pressed
+void MoverUni(char letter){
+    sf::Vector2f current_position(this->sprite_.getPosition().x,this->sprite_.getPosition().y);
+    current_position= this->validar_posicion(current_position);
+
+
+    switch (letter){
+    case 'D': current_position.x = MoverDerecha(current_position.x); break;
+    case 'A': current_position.x = MoverIzquierda(current_position.x); break;
+    case 'W': current_position.y = MoverArriba(current_position.y); break;
+    case 'S': current_position.y = MoverAbajo(current_position.y); break;
+    };
+    this->sprite_.setPosition(current_position);
+
+}
+
+
+//
+};
+
+class Enemy:public Movement{
+
+	private:
+		sf:: Texture textura_;
+		sf:: Sprite sprite_;
+    void Tex(){
+        if(!this->textura_.loadFromFile("media/koopa_txt.jpg")){
+            true;
+        }
+    }
+	public:
+		Enemy (float pos_x, float pos_y) {
+		    this->Tex();
+		    this -> sprite_.setTexture(this->textura_);
+            this -> sprite_.setPosition(pos_x, pos_y);
+		}
+void Draw(sf::RenderWindow &win){
+    win.draw(this->sprite_);
+}
+
+
+
+
+//sf::Event key_pressed
+void MoverUni(char letter){
+    sf::Vector2f current_position(this->sprite_.getPosition().x,this->sprite_.getPosition().y);
+    current_position= this->validar_posicion(current_position);
+
+
+    switch (letter){
+    case 'D': current_position.x = MoverDerecha(current_position.x);break;
+    case 'A': current_position.x = MoverIzquierda(current_position.x); break;
+    case 'W': current_position.y = MoverArriba(current_position.y); break;
+    case 'S': current_position.y = MoverAbajo(current_position.y); break;
+    };
+    this->sprite_.setPosition(current_position);
+
+}
+
+
+//
+};
+
+
+
+int main()
+{
+    sf::RenderWindow window(sf::VideoMode(1024, 720), "POO - Koopa");
+    window.setFramerateLimit(40);
+    Koopa coopa(0,0);
+    Enemy samuel(0,0);
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed){
+                window.close();
+            }
+        }
+        sf::Texture background;
+        if(!background.loadFromFile("media/backgr.jpg")){
+                false;
+        }
+        sf::Sprite backgr(background);
+
+        window.clear();
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+        coopa.MoverUni('D');
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+        coopa.MoverUni('A');
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+        coopa.MoverUni('W');
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+        coopa.MoverUni('S');
+
+        //Samuel
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+        samuel.MoverUni('D');
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+        samuel.MoverUni('A');
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+        samuel.MoverUni('W');
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+        samuel.MoverUni('S');
+        window.draw(backgr);
+        coopa.Draw(window);
+
+
+        window.draw(backgr);
+        coopa.Draw(window);
+        samuel.Draw(window);
+        window.display();
+    }
+
+    return 0;
+}
